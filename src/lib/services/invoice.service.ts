@@ -1,5 +1,7 @@
 import { APIErrorCode, APIResponseError, isFullPage } from '@notionhq/client'
+import { unstable_cache } from 'next/cache'
 
+import { logError } from '@/lib/logger'
 import { notion } from '@/lib/notion'
 import { getRelationIds, parseInvoicePage } from '@/lib/utils/notion-parser'
 import type { Invoice } from '@/types/invoice'
@@ -43,7 +45,7 @@ function assertUsablePage(
  * @throws {NotionInvoiceNotFoundError} 페이지가 없거나 archived/partial 인 경우
  * @throws 그 외 Notion API 에러는 그대로 rethrow (상위 error 경계에서 처리)
  */
-export async function getInvoiceById(notionPageId: string): Promise<Invoice> {
+export async function fetchInvoiceById(notionPageId: string): Promise<Invoice> {
   try {
     // 1) 견적서 본문 페이지 조회 및 유효성 검증
     const rawPage = await notion.pages.retrieve({ page_id: notionPageId })
@@ -82,6 +84,19 @@ export async function getInvoiceById(notionPageId: string): Promise<Invoice> {
       throw error
     }
     // 그 외(rate limit, 인증 오류 등)는 상위 계층에서 처리하도록 rethrow
+    logError('invoice.service.getInvoiceById', error)
     throw error
   }
 }
+
+/**
+ * getInvoiceById 의 캐싱 래퍼.
+ * - @notionhq/client 는 Next.js의 fetch 캐시 확장을 인식하지 못해 자동 캐싱이 적용되지 않음(실측 확인).
+ * - 견적서는 발행 후 상태 변경이 잦지 않으므로 60초 재검증 주기로 unstable_cache 적용.
+ * - NotionInvoiceNotFoundError 등 예외가 발생한 호출은 캐싱되지 않고 매번 재조회됨(Next.js 기본 동작).
+ */
+export const getInvoiceById = unstable_cache(
+  fetchInvoiceById,
+  ['invoice-by-id'],
+  { revalidate: 60 }
+)
