@@ -14,7 +14,6 @@ function makeProperties(overrides: Record<string, unknown> = {}) {
     발행일: { type: 'date', date: { start: '2026-06-22' } },
     유효기간: { type: 'date', date: { start: '2026-06-29' } },
     상태: { type: 'status', status: { name: '대기' } },
-    '총 금액': { type: 'number', number: 5000000 },
     항목: { type: 'relation', relation: [{ id: 'item-1' }, { id: 'item-2' }] },
     ...overrides,
   }
@@ -62,7 +61,7 @@ describe('parseInvoicePage', () => {
       issueDate: '2026-06-22',
       validUntil: '2026-06-29',
       status: 'pending',
-      totalAmount: 5000000,
+      totalAmount: 4000000,
     })
     expect(invoice.items).toHaveLength(2)
     expect(invoice.items[0]).toMatchObject({
@@ -92,19 +91,17 @@ describe('parseInvoicePage', () => {
     expect(invoice.items[0].amount).toBe(30000)
   })
 
-  it('항목이 없으면 totalAmount 는 총 금액 속성값을 사용한다', () => {
+  it('항목이 없으면 totalAmount 는 0이다', () => {
     const page = makeInvoicePage(makeProperties())
 
     const invoice = parseInvoicePage(page, [])
 
     expect(invoice.items).toHaveLength(0)
-    expect(invoice.totalAmount).toBe(5000000)
+    expect(invoice.totalAmount).toBe(0)
   })
 
-  it('총 금액 속성이 비어 있으면 항목 합계로 폴백한다', () => {
-    const page = makeInvoicePage(
-      makeProperties({ '총 금액': { type: 'number', number: null } })
-    )
+  it('totalAmount 는 항목 추가/변경 시 항상 합계로 재계산된다', () => {
+    const page = makeInvoicePage(makeProperties())
     const items = [
       makeItemPage('item-1', '항목1', 1, 1000),
       makeItemPage('item-2', '항목2', 2, 2000),

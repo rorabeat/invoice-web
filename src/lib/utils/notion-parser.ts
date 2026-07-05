@@ -15,7 +15,6 @@ const INVOICE_PROPERTY = {
   issueDate: '발행일', // Date
   status: '상태', // Select (대기/승인/거절)
   validUntil: '유효기간', // Date
-  totalAmount: '총 금액', // Number
   clientName: '클라이언트명', // Rich text
   items: '항목', // Relation → Items DB
 } as const
@@ -222,14 +221,8 @@ export function parseInvoicePage(
 
   const items = itemPages.map(parseInvoiceItem)
 
-  // `총 금액` 속성값을 우선 사용하되, 비어 있으면 항목 합계로 폴백
-  const totalAmountProperty = getNumber(
-    properties,
-    INVOICE_PROPERTY.totalAmount,
-    id
-  )
-  const totalAmount =
-    totalAmountProperty ?? items.reduce((sum, item) => sum + item.amount, 0)
+  // 항목이 추가/변경되어도 항상 최신 합계가 반영되도록 `총 금액` 속성은 사용하지 않고 매번 재계산
+  const totalAmount = items.reduce((sum, item) => sum + item.amount, 0)
 
   return {
     id,
