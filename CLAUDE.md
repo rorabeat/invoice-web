@@ -1,6 +1,11 @@
 # 🤖 Claude Code 개발 지침
 
-**claude-nextjs-starters**는 Next.js 15.5.3 + React 19 기반 모던 웹 애플리케이션 스타터 템플릿입니다.
+모든 작업내용 및 문서 작성은 한글로 진행해 주세요
+
+**invoice-web**은 노션을 데이터베이스로 활용하여 견적서를 관리하고, 클라이언트가 웹에서 조회 및 PDF 다운로드할 수 있는 시스템입니다.
+
+📋 상세 프로젝트 요구사항은 @/docs/PRD.md 참조
+📐 AI Agent 작업 규칙은 @/shrimp-rules.md 참조 (필수 디렉토리 구조, 파일 네이밍, 다중 파일 조정 규칙 등)
 
 ## 🛠️ 핵심 기술 스택
 
@@ -15,6 +20,7 @@
 
 - **🗺️ 개발 로드맵**: `@/docs/ROADMAP.md`
 - **📋 프로젝트 요구사항**: `@/docs/PRD.md`
+- **📐 AI Agent 작업 규칙**: `@/shrimp-rules.md`
 - **📁 프로젝트 구조**: `@/docs/guides/project-structure.md`
 - **🎨 스타일링 가이드**: `@/docs/guides/styling-guide.md`
 - **🧩 컴포넌트 패턴**: `@/docs/guides/component-patterns.md`
